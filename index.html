@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SAT-CPI Online Webserver</title>
+  <style>
+  img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+
+  .topnav {
+  overflow: hidden;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  border: 1px solid #a2a2a2;
+  background-color: #360385;
+  -webkit-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+
+  .topnav a.active {
+    margin: 0;
+    font-size: 1.45em;
+    float: left;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+  }
+
+  .topnav a.main {
+    float: right;
+    text-decoration: none;
+    color: #f2f2f2;
+    margin-top: 5px;
+    padding: 10px 15px;
+    text-transform: uppercase;
+    text-align: center;
+    display: block;
+    font-size: .99em;
+  }
+
+  .topnav a:hover {
+  color: #718daa;
+  }
+
+
+  </style>
+  </head>
+
+  <body>
+  <div class="topnav">
+    <a class="active" href="https://mypage.cuhk.edu.cn/academics/lizhen/" style="font-size: 20px">DEEP BIT LAB</a>
+    <a class="main" href="https://www.cuhk.edu.cn/en">CUHK-SZ</a>
+    <a class="main" href="{{ url_for('static', filename='example.html')}}">Instruction</a>
+    
+  </div>
+
+    <div style="width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        ">
+    <img src="{{ url_for('static', filename='CPI.png')}}" alt="cpi" style="width:400px;height:160px;" class="center">
+    <p>SAT-CPIP is a new method for Compound-Protein Interaction (CPI) prediction in drug discovery that uses protein 3D structures. It outperforms previous state-of-the-art approaches by 4.1% in accuracy scores and 4.3% in AUC scores on four datasets. SAT-CPI utilizes a 3D point cloud-based encoder, a twin-transformer network, and a novel crossmodality attention mask to refine the 3D structure of proteins. During inference, only sequence information is used to generate more accurate CPI predictions.</p>
+    </div>
+    <div style="width: 800px; 
+        margin-left: auto;
+        margin-right: auto;
+        ">
+    <form id="upload-form">
+      <h3>SELECTED SMILES:</h3>
+      <i><b>Paste</b> a single or several smiles into the field below (one compound per line)</i> or
+      <input type="button" value="Load sample data" onclick="paste_sample_data('SMILES')"> :
+      <br><br>
+      <textarea id="SM" name="SM" rows="8" cols="60" placeholder=" Please paste the smiles..."></textarea>
+    <br>
+      <label for="file1">...Or <b>upload</b> the SMILES file (one per line) from your local disk:</label>
+      <input type="file" id="file1" name="file1"><br>
+    <br>
+      <h3>SELECTED PROETIN SEQUENCE:</h3>
+      <i><b>Paste</b> a single or several protein sequences into the field below (one sequence per line)</i> or
+      <input type="button" value="Load sample data" onclick="paste_sample_data('SEQ')"> :
+      <br><br>
+      <textarea id="PRO" name="PRO" rows="8" cols="60" placeholder=" Please paste the protein seqeunces..."></textarea>
+    <br>
+      <label for="file2">...Or <b>upload</b> PROTEIN SEQUENCE(S) (one per line) file from your local disk:</label>
+      <input type="file" id="file2" name="file2"><br>
+    <br>
+    <br>
+      <button type="button" id="popUpYes" style="font-size:17px; border-radius: 3px; margin: 4px 2px; height: 28px; width: 75px; background-color: green; border: none; color: white;" onclick="uploadFiles()">Submit</button>
+
+      <button type="reset" id="popUpYes" value="Reset" style="font-size:17px; border-radius: 3px; margin: 4px 2px; height: 28px; width: 75px; background-color: red; border: none; color: white;">Reset</button>
+    <br>
+
+      <h3>PREDICTED BINDING RESULT:</h3>
+
+    <br> 
+    </form>
+    </div>
+    <div style="width: 800px; 
+          margin-left: auto;
+          margin-right: auto;
+          text-align:center
+          ">
+
+      <div id="response"></div>
+      <script>
+        function uploadFiles() {
+          var form = document.getElementById('upload-form');
+          var formData = new FormData(form);
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/submit-files');
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              document.getElementById('response').innerHTML = xhr.responseText;
+            } else {
+              document.getElementById('response').innerHTML = 'Error ' + xhr.status;
+            }
+          };
+          xhr.send(formData);
+        }
+
+        function paste_sample_data(input_type) {
+
+           var sample_seq;
+
+
+           if (input_type == 'SMILES') {
+              
+              sample_seq = "[H][C@]12[C@@H](C)C(S[C@]3([H])CN[C@@]([H])(C3)C(=O)NC3=CC=CC(=C3)C(O)=O)=C(N1C(=O)[C@]2([H])[C@@H](C)O)C(O)=O\nCC1=NC=C(COP(O)(O)=O)C(C=O)=C1O\nN[C@@H](CC1=CNC=N1)C(O)=O";
+              
+              document.getElementById("SM").value = sample_seq;
+           }
+
+           
+           if (input_type == 'SEQ') {
+
+              sample_seq = "MVKFNSSRKSGKSKKTIRKLTAPETVKQNKPQKVFEKCFMRGRYMLSTVLILLGLCALVARAAYVQSINADTLSNEADKRSLRKDEVLSVRGSILDRNGQLLSVSVPMSAIVADPKTMLKENSLADKERIAALAEELGMTENDLVKKIEKNSKSGYLYLARQVELSKANYIRRLKIKGIILETEHRRFYPRVEEAAHVVGYTDIDGNGIEGIEKSFNSLLVGKDGSRTVRKDKRGNIVAHISDEKKYDAQDVTLSIDEKLQSMVYREIKKAVSENNAESGTAVLVDVRTGEVLAMATAPSYNPNNRVGVKSELMRNRAITDTFEPGSTVKPFVVLTALQRGVVKRDEIIDTTSFKLSGKEIVDVAPRAQQTLDEILMNSSNRGVSRLALRMPPSALMETYQNAGLSKPTDLGLIGEQVGILNANRKRWADIERATVAYGYGITATPLQIARAYATLGSFGVYRPLSITKVDPPVIGKRVFSEKITKDIVGILEKVAIKNKRAMVEGYRVGVKTGTARKIENGHYVNKYVAFTAGIAPISDPRYALVVLINDPKAGEYYGGAVSAPVFSNIMGYALRANAIPQDAEAAENTTTKSAKRIVYIGEHKNQKVN\nMMEPEEYRERGREMVDYICQYLSTVRERRVTPDVQPGYLRAQLPESAPEDPDSWDSIFGDIERIIMPGVVHWQSPHMHAYYPALTSWPSLLGDMLADAINCLGFTWASSPACTELEMNVMDWLAKMLGLPEHFLHHHPSSQGGGVLQSTVSESTLIALLAARKNKILEMKTSEPDADESCLNARLVAYASDQAHSSVEKAGLISLVKMKFLPVDDNFSLRGEALQKAIEEDKQRGLVPVFVCATLGTTGVCAFDCLSELGPICAREGLWLHIDAAYAGTAFLCPEFRGFLKGIEYADSFTFNPSKWMMVHFDCTGFWVKDKYKLQQTFSVNPIYLRHANSGVATDFMHWQIPLSRRFRSVKLWFVIRSFGVKNLQAHVRHGTEMAKYFESLVRNDPSFEIPAKRHLGLVVFRLKGPNCLTENVLKEIAKAGRLFLIPATIQDKLIIRFTVTSQFTTRDDILRDWNLIRDAATLILSQHCTSQPSPRVGNLISQIRGARAWACGTSLQSVSGAGDDPVQARKIIKQPQRVGAGPMKRENGLHLETLLDPVDDCFSEEAPDATKHKLSSFLFSYLSVQTKKKTVRSLSCNSVPVSAQKPLPTEASVKNGGSSRVRIFSRFPEDMMMLKKSAFKKLIKFYSVPSFPECSSQCGLQLPCCPLQAMV\nMSETSRTAFGGRRAVPPNNSNAAEDDLPTVELQGVVPRGVNLQEFLNVTSVHLFKERWDTNKVDHHTDKYENNKLIVRRGQSFYVQIDFSRPYDPRRDLFRVEYVIGRYPQENKGTYIPVPIVSELQSGKWGAKIVMREDRSVRLSIQSSPKCIVGKFRMYVAVWTPYGVLRTSRNPETDTYILFNPWCEDDAVYLDNEKEREEYVLNDIGVIFYGEVNDIKTRSWSYGQFEDGILDTCLYVMDRAQMDLSGRGNPIKVSRVGSAMVNAKDDEGVLVGSWDNIYAYGVPPSAWTGSVDILLEYRSSENPVRYGQCWVFAGVFNTFLRCLGIPARIVTNYFSAHDNDANLQMDIFLEEDGNVNSKLTKDSVWNYHCWNEAWMTRPDLPVGFGGWQAVDSTPQENSDGMYRCGPASVQAIKHGHVCFQFDAPFVFAEVNSDLIYITAKKDGTHVVENVDATHIGKLIVTKQIGGDGMMDITDTYKFQEGQEEERLALETALMYGAKKPLNTEGVMKSRSNVDMDFEVENAVLGKDFKLSITFRNNSHNRYTITAYLSANITFYTGVPKAEFKKETFDVTLEPLSFKKEAVLIQAGEYMGQLLEQASLHFFVTARINETRDVLAKQKSTVLTIPEIIIKVRGTQVVGSDMTVTVQFTNPLKETLRNVWVHLDGPGVTRPMKKMFREIRPNSTVQWEEVCRPWVSGHRKLIASMSSDSLRHVYGELDVQIQRRPSM";
+
+              document.getElementById("PRO").value = sample_seq;
+           }
+
+        }
+
+      </script>
+    </div>
+  </body>
+</html>
